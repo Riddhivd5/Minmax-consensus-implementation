@@ -1,0 +1,8 @@
+prefix=/home/ginger/Desktop/catkin_ws/install
+
+Name: mascot
+Description: Description of mascot
+Version: 0.0.0
+Cflags: -I${prefix}/include
+Libs: -L${prefix}/lib 
+Requires: roscpp rospy image_transport std_msgs sensor_msgs geometry_msgs message_runtime gazebo_ros
