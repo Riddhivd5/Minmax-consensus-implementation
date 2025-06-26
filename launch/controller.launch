@@ -6,4 +6,20 @@
                 <node name="control3" pkg="mascot" type="control.py" output="screen" args="-index 3" /> 
             
                 <node name="control4" pkg="mascot" type="control.py" output="screen" args="-index 4" /> 
+            
+                <node name="control5" pkg="mascot" type="control.py" output="screen" args="-index 5" /> 
+            
+                <node name="control6" pkg="mascot" type="control.py" output="screen" args="-index 6" /> 
+            
+                <node name="control7" pkg="mascot" type="control.py" output="screen" args="-index 7" /> 
+            
+                <node name="control8" pkg="mascot" type="control.py" output="screen" args="-index 8" /> 
+            
+                <node name="control9" pkg="mascot" type="control.py" output="screen" args="-index 9" /> 
+            
+                <node name="control10" pkg="mascot" type="control.py" output="screen" args="-index 10" /> 
+            
+                <node name="control11" pkg="mascot" type="control.py" output="screen" args="-index 11" /> 
+            
+                <node name="control12" pkg="mascot" type="control.py" output="screen" args="-index 12" /> 
             </launch>

@@ -4,7 +4,7 @@
                 <arg name="ns" value="r1"/>
                 <param name="robot_description" command="$(find xacro)/xacro $(find mascot)/urdf/model.xacro robot_name:=$(arg ns)" />                                        
                 <include file="$(find mascot)/launch/one_robot.launch">
-                <arg name="init_pose" value="-x -6 -y -6 -z 0" />
+                <arg name="init_pose" value="-x -8 -y -5 -z 1.0" />
                 <arg name="robot_name" value="r1" />
                 </include>
             </group>
@@ -15,7 +15,7 @@
                 <arg name="ns" value="r2"/>
                 <param name="robot_description" command="$(find xacro)/xacro $(find mascot)/urdf/model.xacro robot_name:=$(arg ns)" />                                        
                 <include file="$(find mascot)/launch/one_robot.launch">
-                <arg name="init_pose" value="-x -6 -y 0 -z 0" />
+                <arg name="init_pose" value="-x 11 -y -13 -z 1.0" />
                 <arg name="robot_name" value="r2" />
                 </include>
             </group>
@@ -26,7 +26,7 @@
                 <arg name="ns" value="r3"/>
                 <param name="robot_description" command="$(find xacro)/xacro $(find mascot)/urdf/model.xacro robot_name:=$(arg ns)" />                                        
                 <include file="$(find mascot)/launch/one_robot.launch">
-                <arg name="init_pose" value="-x -6 -y 6 -z 0" />
+                <arg name="init_pose" value="-x -3 -y 7 -z 1.0" />
                 <arg name="robot_name" value="r3" />
                 </include>
             </group>
@@ -37,7 +37,7 @@
                 <arg name="ns" value="r4"/>
                 <param name="robot_description" command="$(find xacro)/xacro $(find mascot)/urdf/model.xacro robot_name:=$(arg ns)" />                                        
                 <include file="$(find mascot)/launch/one_robot.launch">
-                <arg name="init_pose" value="-x 0 -y -6 -z 0" />
+                <arg name="init_pose" value="-x 5 -y -11 -z 1.0" />
                 <arg name="robot_name" value="r4" />
                 </include>
             </group>
@@ -48,7 +48,7 @@
                 <arg name="ns" value="r5"/>
                 <param name="robot_description" command="$(find xacro)/xacro $(find mascot)/urdf/model.xacro robot_name:=$(arg ns)" />                                        
                 <include file="$(find mascot)/launch/one_robot.launch">
-                <arg name="init_pose" value="-x 0 -y 0 -z 0" />
+                <arg name="init_pose" value="-x 10 -y 3 -z 1.0" />
                 <arg name="robot_name" value="r5" />
                 </include>
             </group>
@@ -59,7 +59,7 @@
                 <arg name="ns" value="r6"/>
                 <param name="robot_description" command="$(find xacro)/xacro $(find mascot)/urdf/model.xacro robot_name:=$(arg ns)" />                                        
                 <include file="$(find mascot)/launch/one_robot.launch">
-                <arg name="init_pose" value="-x 0 -y 6 -z 0" />
+                <arg name="init_pose" value="-x -6 -y 0 -z 1.0" />
                 <arg name="robot_name" value="r6" />
                 </include>
             </group>
@@ -70,7 +70,7 @@
                 <arg name="ns" value="r7"/>
                 <param name="robot_description" command="$(find xacro)/xacro $(find mascot)/urdf/model.xacro robot_name:=$(arg ns)" />                                        
                 <include file="$(find mascot)/launch/one_robot.launch">
-                <arg name="init_pose" value="-x 6 -y -6 -z 0" />
+                <arg name="init_pose" value="-x 0 -y 9 -z 1.0" />
                 <arg name="robot_name" value="r7" />
                 </include>
             </group>
@@ -81,7 +81,7 @@
                 <arg name="ns" value="r8"/>
                 <param name="robot_description" command="$(find xacro)/xacro $(find mascot)/urdf/model.xacro robot_name:=$(arg ns)" />                                        
                 <include file="$(find mascot)/launch/one_robot.launch">
-                <arg name="init_pose" value="-x 6 -y 0 -z 0" />
+                <arg name="init_pose" value="-x -10 -y -14 -z 1.0" />
                 <arg name="robot_name" value="r8" />
                 </include>
             </group>
@@ -92,7 +92,7 @@
                 <arg name="ns" value="r9"/>
                 <param name="robot_description" command="$(find xacro)/xacro $(find mascot)/urdf/model.xacro robot_name:=$(arg ns)" />                                        
                 <include file="$(find mascot)/launch/one_robot.launch">
-                <arg name="init_pose" value="-x 8 -y 6 -z 0" />
+                <arg name="init_pose" value="-x 6 -y -17 -z 1.0" />
                 <arg name="robot_name" value="r9" />
                 </include>
             </group>
@@ -103,30 +103,8 @@
                 <arg name="ns" value="r10"/>
                 <param name="robot_description" command="$(find xacro)/xacro $(find mascot)/urdf/model.xacro robot_name:=$(arg ns)" />                                        
                 <include file="$(find mascot)/launch/one_robot.launch">
-                <arg name="init_pose" value="-x -3 -y -3 -z 0" />
+                <arg name="init_pose" value="-x 13 -y -18 -z 1.0" />
                 <arg name="robot_name" value="r10" />
-                </include>
-            </group>
-
-            
-
-            <group ns="r11">
-                <arg name="ns" value="r11"/>
-                <param name="robot_description" command="$(find xacro)/xacro $(find mascot)/urdf/model.xacro robot_name:=$(arg ns)" />                                        
-                <include file="$(find mascot)/launch/one_robot.launch">
-                <arg name="init_pose" value="-x 3 -y -3 -z 0" />
-                <arg name="robot_name" value="r11" />
-                </include>
-            </group>
-
-            
-
-            <group ns="r12">
-                <arg name="ns" value="r12"/>
-                <param name="robot_description" command="$(find xacro)/xacro $(find mascot)/urdf/model.xacro robot_name:=$(arg ns)" />                                        
-                <include file="$(find mascot)/launch/one_robot.launch">
-                <arg name="init_pose" value="-x 3 -y 3 -z 0" />
-                <arg name="robot_name" value="r12" />
                 </include>
             </group>
 
