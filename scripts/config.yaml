@@ -1,67 +1,71 @@
 Robot:
-  Number: 4 # Number of Drones
-  InitialPose : 1 # Make it false if you want to place the robot at random points
-  Max_force: 0.6 # Max-force in x and y axis
-  Position:  # Intial Position of each Drones X Y Z ..... Add the position according to your no. of robots
+  Number: 12 # Number of Drones
+  InitialPose : 1
+  Max_force: 0.6
+  Position:
     r1: 
-      x: -10
-      y: 10
+      x: -6
+      y: -6
       z: 1
 
     r2: 
-      x: -10
-      y: -10 
-      z: 2 
+      x: -6
+      y: 0
+      z: 2
     
     r3: 
-      x: 10
-      y: -10
+      x: -6
+      y: 6
       z: 3
     
     r4: 
-      x: 10
-      y: 10  
+      x: 0
+      y: -6
       z: 4
     
     r5: 
-      x: 16
-      y: -20 
+      x: 0
+      y: 0
       z: 5
 
     r6: 
-      x: -8
-      y: 18 
-      z: 6 
-    
-    r7: 
-      x: 2
-      y: -12 
+      x: 0
+      y: 6
+      z: 6
+
+    r7:
+      x: 6
+      y: -6
       z: 7
-    
-    r8: 
-      x: 12
-      y: -18  
+
+    r8:
+      x: 6
+      y: 0
       z: 8
-    
-    r9: 
-      x: 5
-      y: -17  
+
+    r9:
+      x: 8
+      y: 6
       z: 9
 
-    r10: 
-      x: -8
-      y: 18  
-      z: 10
-    
-    r11: 
-      x: 40
-      y: -40  
-      z: 11
-    
-    r12: 
-      x: -40
-      y: -40  
-      z: 12
+    r10:
+      x: -3
+      y: -3
+      z: 3
+
+    r11:
+      x: 3
+      y: -3
+      z: 6
+
+    r12:
+      x: 3
+      y: 3
+      z: 9
+
+ 
+  
+
 
 Control:
   Custom_Control_Law : True # Enable Custom Control

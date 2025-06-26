@@ -71,12 +71,17 @@ class Robot:
         self.force_in_x = []
         self.force_in_y = []
         self.time_taken = []
+        self.time_taken = []
+        self.pos_initialization= False
+        self.vel_initialization= False
 
     def cb_pose(self, data):
         self.pose = data
+        self.pos_initialization= True
 
     def cb_vel(self, data):
         self.vel = data
+        self.vel_initialization= True
 
     def cb_acc(self, data):
         self.acc = data
@@ -169,8 +174,12 @@ def position_control():
         if(time.time() - prev_time >= 0.01):
             
             prev_time=time.time()
-            # set_pos_x = (sum([robot[j].pose.position.x for j in range(num_agent)])-robot[i].pose.position.x)/(num_agent-1)
-            # set_pos_y = (sum([robot[j].pose.position.x for j in range(num_agent)])-robot[i].pose.position.x)/(num_agent-1)
+            #set_pos_x = (sum([robot[j].pose.position.x for j in range(num_agent)])-robot[i].pose.position.x)/(num_agent-1)
+            #set_pos_y = (sum([robot[j].pose.position.x for j in range(num_agent)])-robot[i].pose.position.x)/(num_agent-1)
+            set_pos_x = 2
+            set_pos_y = 3
+            set_vel_x=0
+            set_vel_y=0
 
             pos_error_x = set_pos_x - robot[i].pose.position.x
             pos_error_y = set_pos_y - robot[i].pose.position.y
@@ -303,46 +312,56 @@ def mixmax_consensus():
             now = time.time()
             for j in range(num_agent):
                 robot[j].append_data(set_pos_x,set_pos_y,robot[j].pose.position.x,robot[j].pose.position.y,robot[j].vel.linear.x,robot[j].vel.linear.y,now - program_starts)  #  Apepnding the data to draw the plot at the end
+                
+                
+                
 
 def user_control_func():
-
     rospy.sleep(0.5)
-    if i != leader:
-        robot[i].start_consenctrl()  ## i is index of the robot
+    
+    robot[i].start_consenctrl()  ## i is index of the robot
+    print(f"Drone {i}: Started control")
+
     rospy.sleep(0.5)
     program_starts = time.time()
-    prev_time=0
+    prev_time = 0
+
     while not rospy.is_shutdown():
-        # Write your control Algorithms here
-        if(time.time() - prev_time >= 0.01):  # 0.01 is a loop Time # controller time period
-            prev_time=time.time()
-        
-        #### Get States All the obtained states are in Earth Frame ############
+        if time.time() - prev_time >= 0.01:
+            prev_time = time.time()
 
-            pos_x = [robot[i].pose.position.x for i in range(num_agent)] # get_Positon   
-            vel_x = [robot[i].vel.linear.x  for i in range(num_agent)] # get_Linear_Velocity 
-            acc_x = [robot[i].acc.linear.x  for i in range(num_agent)] # get_Linear_Acceleration
+            #### Get States All the obtained states are in Earth Frame ############
+            pos_x = [robot[j].pose.position.x for j in range(num_agent)]
+            vel_x = [robot[j].vel.linear.x for j in range(num_agent)]
+            acc_x = [robot[j].acc.linear.x for j in range(num_agent)]
 
-            pos_y = [robot[i].pose.position.y for i in range(num_agent)] # get_Positon   
-            vel_y = [robot[i].vel.linear.y  for i in range(num_agent)] # get_Linear_Velocity 
-            acc_y = [robot[i].acc.linear.y  for i in range(num_agent)] # get_Linear_Acceleration
+            pos_y = [robot[j].pose.position.y for j in range(num_agent)]
+            vel_y = [robot[j].vel.linear.y for j in range(num_agent)]
+            acc_y = [robot[j].acc.linear.y for j in range(num_agent)]
 
-            ##########
+            ########## Min–Max Force ##########
+            force_x, force_y = control_user(pos_x, vel_x, acc_x, pos_y, vel_y, acc_y, i, num_agent, leader=None)
 
-            force_x,force_y = control_user(pos_x,vel_x,acc_x,pos_y,vel_y,acc_y,i,num_agent,leader)
+            # Add constant upward lift to hover
+            force_z = 9.812
 
-            ##  Write your Algorithms here  ######
+            print(f"Drone {i} | Force: ({force_x:.2f}, {force_y:.2f}, {force_z:.2f})")
+            robot[i].pub_force(force_x, force_y, force_z)
 
-
-            #########
-
-            ##### Publish Force Command ###############
-
+            ########## Log for Plotting ##########
             now = time.time()
-            robot[i].pub_force(force_x, force_y, 0)
-
             for j in range(num_agent):
-                robot[j].append_data(set_pos_x,set_pos_y,robot[j].pose.position.x,robot[j].pose.position.y,robot[j].vel.linear.x,robot[j].vel.linear.y,now - program_starts)  #  Apepnding the data to draw the plot at the end
+                robot[j].append_data(
+                    set_pos_x, set_pos_y,
+                    robot[j].pose.position.x, robot[j].pose.position.y,
+                    robot[j].vel.linear.x, robot[j].vel.linear.y,
+                    now - program_starts
+                )
+
+                
+            print(f"[INFO] Drone {i} running user_control_func()")
+  
+
 
 
 def handler(signum, frame):
