@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+
 import rospy
 from std_msgs.msg import Bool,Empty
 from geometry_msgs.msg import Point
@@ -20,14 +21,19 @@ if data["Robot"]["InitialPose"] is False :
 rospy.init_node("Initialization", anonymous=True) # Initialize ros node
 
 
+
 def takeoff(num_agent):
-    pub = [
-        rospy.Publisher("/r{index}/drone/takeoff".format(index=i + 1), Empty, queue_size=10)
+    pubs = [
+        rospy.Publisher(f"/r{i+1}/drone/takeoff", Empty, queue_size=10)
         for i in range(num_agent)
-    ] # Create a takeoff publisher for each drone
-    rospy.sleep(0.5) # delay for ros to initalize and create a publisher otherwise it won't be able to accept the published command
-    for p in pub:
-        p.publish(Empty()) # Publish empty msg to takeoff
+    ]
+    rospy.sleep(1.0)
+
+    for _ in range(10):
+        for pub in pubs:
+            pub.publish(Empty())
+        rospy.sleep(0.1)
+    print("ini no of agents", num_agent)
 
 def position(num_agent,data):
     pub = [
