@@ -12,6 +12,7 @@ import numpy as np
 import argparse
 from custom_control import control_user
 
+
 parser = argparse.ArgumentParser(description='Index arguments')
 parser.add_argument('-index', type=int, default=1, help='index of Robot')
 args = rospy.myargv()
@@ -71,17 +72,16 @@ class Robot:
         self.force_in_x = []
         self.force_in_y = []
         self.time_taken = []
-        self.time_taken = []
-        self.pos_initialization= False
-        self.vel_initialization= False
+        
+   
 
     def cb_pose(self, data):
         self.pose = data
-        self.pos_initialization= True
+
 
     def cb_vel(self, data):
         self.vel = data
-        self.vel_initialization= True
+    
 
     def cb_acc(self, data):
         self.acc = data
@@ -139,8 +139,9 @@ class Robot:
 
     def update_force(self):
         global max_force
+
         my_gain_p = 1.2
-        my_gain_d = 2.5
+        my_gain_d = 3.5
         self.start_consenctrl()
         while not rospy.is_shutdown():
             # print("hii")
@@ -174,12 +175,8 @@ def position_control():
         if(time.time() - prev_time >= 0.01):
             
             prev_time=time.time()
-            #set_pos_x = (sum([robot[j].pose.position.x for j in range(num_agent)])-robot[i].pose.position.x)/(num_agent-1)
-            #set_pos_y = (sum([robot[j].pose.position.x for j in range(num_agent)])-robot[i].pose.position.x)/(num_agent-1)
-            set_pos_x = 2
-            set_pos_y = 3
-            set_vel_x=0
-            set_vel_y=0
+            # set_pos_x = (sum([robot[j].pose.position.x for j in range(num_agent)])-robot[i].pose.position.x)/(num_agent-1)
+            # set_pos_y = (sum([robot[j].pose.position.x for j in range(num_agent)])-robot[i].pose.position.x)/(num_agent-1)
 
             pos_error_x = set_pos_x - robot[i].pose.position.x
             pos_error_y = set_pos_y - robot[i].pose.position.y
@@ -312,14 +309,186 @@ def mixmax_consensus():
             now = time.time()
             for j in range(num_agent):
                 robot[j].append_data(set_pos_x,set_pos_y,robot[j].pose.position.x,robot[j].pose.position.y,robot[j].vel.linear.x,robot[j].vel.linear.y,now - program_starts)  #  Apepnding the data to draw the plot at the end
-                
-                
-                
 
+
+
+
+
+
+import time
+import rospy
+consensus_time = None  # Store the time when consensus was first reached
+
+
+#time sampling
 def user_control_func():
+    global consensus_time
+
     rospy.sleep(0.5)
-    
-    robot[i].start_consenctrl()  ## i is index of the robot
+    robot[i].start_consenctrl()
+    print(f"Drone {i}: Started control")
+
+    rospy.sleep(0.5)
+    program_starts = time.time()
+    prev_time = program_starts  # Initialize prev_time with the program start time
+
+    while not rospy.is_shutdown():
+        current_time = time.time()
+        dt = current_time - prev_time  # Calculate the time difference (dt)
+
+        if dt >= 0.01:  # Only proceed if at least 10ms have passed (100Hz loop)
+            prev_time = current_time  # Update prev_time for the next iteration
+
+            # --- Get all drone states ---
+            pos_x = [robot[j].pose.position.x for j in range(num_agent)]
+            vel_x = [robot[j].vel.linear.x for j in range(num_agent)]
+            acc_x = [robot[j].acc.linear.x for j in range(num_agent)]
+            pos_y = [robot[j].pose.position.y for j in range(num_agent)]
+            vel_y = [robot[j].vel.linear.y for j in range(num_agent)]
+            acc_y = [robot[j].acc.linear.y for j in range(num_agent)]
+
+            # --- Leader position as target reference ---
+            set_pos_x = pos_x[0]
+            set_pos_y = pos_y[0]
+
+            # --- Compute control force ---
+            force_x, force_y = control_user(
+                pos_x, vel_x, acc_x,
+                pos_y, vel_y, acc_y,
+                i, num_agent, dt, leader=0
+            )
+            force_z = 10  # Constant upward force to hover
+
+            # --- Apply control ---
+            robot[i].pub_force(force_x, force_y, force_z)
+
+            # --- Log data ---
+            now = time.time()
+            for j in range(num_agent):
+                robot[j].append_data(
+                    set_pos_x, set_pos_y,
+                    robot[j].pose.position.x, robot[j].pose.position.y,
+                    robot[j].vel.linear.x, robot[j].vel.linear.y,
+                    now - program_starts
+                )
+
+            # --- Check consensus (only leader does this) ---
+            if i == 0 and consensus_time is None:
+                consensus_reached = True
+                for j in range(1, num_agent):
+                    dx = pos_x[j] - pos_x[0]
+                    dy = pos_y[j] - pos_y[0]
+                    dist = (dx**2 + dy**2)**0.5
+                    speed = (vel_x[j]**2 + vel_y[j]**2)**0.5
+
+                    if dist > 0.25 or speed > 0.12:
+                        consensus_reached = False
+                        break
+
+                if consensus_reached:
+                    consensus_time = now - program_starts
+
+            print(f"[INFO] Drone {i} running user_control_func()")
+
+    # === Exit logic (e.g., Ctrl+C) ===
+    print("\n================ FINAL POSITIONS ================")
+    for j in range(num_agent):
+        x = robot[j].pose.position.x
+        y = robot[j].pose.position.y
+        role = "Leader" if j == 0 else "Follower"
+        print(f"{role} r{j}: Final Position -> X: {x:.2f}, Y: {y:.2f}")
+    print("=================================================\n")
+
+    if i == 0 and consensus_time is not None:
+        print(f"\n✅ Consensus was reached in {consensus_time:.2f} seconds.\n")
+    elif i == 0:
+        print("\nConsensus not reached during simulation.\n")
+
+
+        
+        
+#minmax
+'''def user_control_func():
+    global consensus_time
+
+    rospy.sleep(0.5)
+    robot[i].start_consenctrl()
+    print(f"Drone {i}: Started control")
+
+    rospy.sleep(0.5)
+    program_starts = time.time()
+    prev_time = 0
+
+    epsilon = 0.3  # Distance threshold for consensus
+
+    while not rospy.is_shutdown():
+        if time.time() - prev_time >= 0.01:
+            prev_time = time.time()
+
+            # --- Get all drone states ---
+            pos_x = [robot[j].pose.position.x for j in range(num_agent)]
+            vel_x = [robot[j].vel.linear.x for j in range(num_agent)]
+            acc_x = [robot[j].acc.linear.x for j in range(num_agent)]
+            pos_y = [robot[j].pose.position.y for j in range(num_agent)]
+            vel_y = [robot[j].vel.linear.y for j in range(num_agent)]
+            acc_y = [robot[j].acc.linear.y for j in range(num_agent)]
+
+            # --- Compute control ---
+            force_x, force_y = control_user(pos_x, vel_x, acc_x, pos_y, vel_y, acc_y, i, num_agent, leader=0)
+            force_z = 10  # Hover
+
+            robot[i].pub_force(force_x, force_y, force_z)
+
+            # --- Log data for plotting ---
+            now = time.time()
+            for j in range(num_agent):
+                robot[j].append_data(
+                    set_pos_x, set_pos_y,
+                    robot[j].pose.position.x, robot[j].pose.position.y,
+                    robot[j].vel.linear.x, robot[j].vel.linear.y,
+                    now - program_starts
+                )
+
+            # --- Single agent checks for consensus ---
+            if i == 0 and consensus_time is None:
+                consensus_reached = True
+                for m in range(num_agent):
+                    for n in range(m + 1, num_agent):
+                        dx = pos_x[m] - pos_x[n]
+                        dy = pos_y[m] - pos_y[n]
+                        dist = (dx**2 + dy**2)**0.5
+                        if dist > epsilon:
+                            consensus_reached = False
+                            break
+                    if not consensus_reached:
+                        break
+
+                if consensus_reached:
+                    consensus_time = now - program_starts
+                    print(f"\n✅ Consensus reached at t = {consensus_time:.2f} seconds.\n")
+
+            print(f"[INFO] Drone {i} running user_control_func()")
+
+    # === When loop exits ===
+    print("\n================ FINAL POSITIONS ================")
+    for j in range(num_agent):
+        x = robot[j].pose.position.x
+        y = robot[j].pose.position.y
+        print(f"r{j}: Final Position -> X: {x:.2f}, Y: {y:.2f}")
+    print("=================================================\n")
+
+    if i == 0 and consensus_time is not None:
+        print(f"\nConsensus was reached in {consensus_time:.2f} seconds.\n")
+    elif i == 0:
+        print("\nConsensus not reached during simulation.\n")'''
+        
+        
+ #experiments     
+'''def user_control_func():
+    global consensus_time
+
+    rospy.sleep(0.5)
+    robot[i].start_consenctrl()
     print(f"Drone {i}: Started control")
 
     rospy.sleep(0.5)
@@ -330,25 +499,30 @@ def user_control_func():
         if time.time() - prev_time >= 0.01:
             prev_time = time.time()
 
-            #### Get States All the obtained states are in Earth Frame ############
+            # --- Get all drone states ---
             pos_x = [robot[j].pose.position.x for j in range(num_agent)]
             vel_x = [robot[j].vel.linear.x for j in range(num_agent)]
             acc_x = [robot[j].acc.linear.x for j in range(num_agent)]
-
             pos_y = [robot[j].pose.position.y for j in range(num_agent)]
             vel_y = [robot[j].vel.linear.y for j in range(num_agent)]
             acc_y = [robot[j].acc.linear.y for j in range(num_agent)]
 
-            ########## Min–Max Force ##########
-            force_x, force_y = control_user(pos_x, vel_x, acc_x, pos_y, vel_y, acc_y, i, num_agent, leader=None)
+            # --- Leader position as target reference ---
+            set_pos_x = pos_x[0]
+            set_pos_y = pos_y[0]
 
-            # Add constant upward lift to hover
-            force_z = 9.812
+            # --- Compute control force ---
+            force_x, force_y = control_user(
+                pos_x, vel_x, acc_x,
+                pos_y, vel_y, acc_y,
+                i, num_agent, leader=0
+            )
+            force_z = 10  # Constant upward force to hover
 
-            print(f"Drone {i} | Force: ({force_x:.2f}, {force_y:.2f}, {force_z:.2f})")
+            # --- Apply control ---
             robot[i].pub_force(force_x, force_y, force_z)
 
-            ########## Log for Plotting ##########
+            # --- Log data ---
             now = time.time()
             for j in range(num_agent):
                 robot[j].append_data(
@@ -358,10 +532,37 @@ def user_control_func():
                     now - program_starts
                 )
 
-                
-            print(f"[INFO] Drone {i} running user_control_func()")
-  
+            # --- Check consensus (only leader does this) ---
+            if i == 0 and consensus_time is None:
+                consensus_reached = True
+                for j in range(1, num_agent):
+                    dx = pos_x[j] - pos_x[0]
+                    dy = pos_y[j] - pos_y[0]
+                    dist = (dx**2 + dy**2)**0.5
+                    speed = (vel_x[j]**2 + vel_y[j]**2)**0.5
 
+                    if dist > 0.25 or speed > 0.12:
+                        consensus_reached = False
+                        break
+
+                if consensus_reached:
+                    consensus_time = now - program_starts
+
+            print(f"[INFO] Drone {i} running user_control_func()")
+
+    # === Exit logic (e.g., Ctrl+C) ===
+    print("\n================ FINAL POSITIONS ================")
+    for j in range(num_agent):
+        x = robot[j].pose.position.x
+        y = robot[j].pose.position.y
+        role = "Leader" if j == 0 else "Follower"
+        print(f"{role} r{j}: Final Position -> X: {x:.2f}, Y: {y:.2f}")
+    print("=================================================\n")
+
+    if i == 0 and consensus_time is not None:
+        print(f"\n✅ Consensus was reached in {consensus_time:.2f} seconds.\n")
+    elif i == 0:
+        print("\nConsensus not reached during simulation.\n")'''
 
 
 def handler(signum, frame):
@@ -451,6 +652,8 @@ def handler(signum, frame):
 
 if index == num_agent:
     signal.signal(signal.SIGINT, handler)
+
+
 
 if __name__ == "__main__":
     try:
