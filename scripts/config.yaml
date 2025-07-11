@@ -1,71 +1,87 @@
 Robot:
-  Number: 12 # Number of Drones
-  InitialPose : 1
-  Max_force: 0.6
+  Number: 2
+  InitialPose: 1
+  Max_force: 0.8
   Position:
-    r1: 
-      x: -6
-      y: -6
+    r1:  # Leader (center)
+      x: 10
+      y: -10
       z: 1
 
-    r2: 
-      x: -6
-      y: 0
+    r2:  # Follows r1
+      x: -10
+      y: 10
       z: 2
-    
-    r3: 
-      x: -6
-      y: 6
+
+    r3:  # Follows r1
+      x: 1.06
+      y: 0.94
       z: 3
-    
-    r4: 
-      x: 0
-      y: -6
+
+    r4:  # Follows r1
+      x: -0.01
+      y: 1.00
       z: 4
-    
-    r5: 
-      x: 0
-      y: 0
+
+    r5:  # Follows r2
+      x: -1.70
+      y: 1.80
       z: 5
 
-    r6: 
-      x: 0
-      y: 6
+    r6:  # Follows r2
+      x: -0.90
+      y: 2.30
       z: 6
 
-    r7:
-      x: 6
-      y: -6
+    r7:  # Follows r3
+      x: 1.80
+      y: 1.80
       z: 7
 
-    r8:
-      x: 6
-      y: 0
+    r8:  # Follows r7
+      x: 2.20
+      y: 2.80
       z: 8
+      
+    r9:  # Below-right corner
+      x: 5
+      y: -15
+      z: 1
 
-    r9:
+    r10:  # Mirror of r1 across X-axis
+      x: -10
+      y: -5
+      z: 1
+
+
+    r11: 
+      x: 5
+      y: -19
+      z: 11
+
+    r12: 
+      x: -9
+      y: -11
+      z: 12
+      
+    r13:
+      x: -4
+      y: 15
+      z: 13
+
+    r14:
+      x: 14
+      y: -15
+      z: 14
+
+    r15:
       x: 8
-      y: 6
-      z: 9
+      y: 11
+      z: 15
 
-    r10:
-      x: -3
-      y: -3
-      z: 3
 
-    r11:
-      x: 3
-      y: -3
-      z: 6
 
-    r12:
-      x: 3
-      y: 3
-      z: 9
-
- 
-  
-
+    
 
 Control:
   Custom_Control_Law : True # Enable Custom Control
@@ -74,7 +90,7 @@ Control:
     kp: 1.2 # Proportional Gain
     kd: 3.5 # differential Gain
   
-  Consensus_Control : 0 # Enable Consensus Control
+  Consensus_Control : False # Enable Consensus Control
   Consensus_params:
     con_kp : 3
     con_kd : 30 
@@ -94,5 +110,4 @@ Plots :
   Velocity : 1 # Enable for Velocity Plot
   Save_plot : 1 # Enable to save Plot
   Show_plot : 0 # Enable to show Plot  Plot will be shown when the program is killed with ( Ctrl+C ) Key
-
 
